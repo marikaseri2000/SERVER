@@ -12,7 +12,6 @@ def my_users(request):
     #in questo caso vogliamo visualizzare il primo diz
     return JsonResponse(user_list[0], safe=False)
 
-
 def user(request, id):
     """funzione dinamica in cui l'id viene scelto """
     user= next((u for u in user_list if u.get("id") == id), None)

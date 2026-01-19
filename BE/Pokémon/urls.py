@@ -1,9 +1,8 @@
 from django.urls import path
-
-from . import views
+from .views import delete_pokemon,add_pokemon, index
 
 urlpatterns = [
-    path("pokemon/list", views.index, name="index"), #recupera tutta la lista dei pokemon
-    path("pokemon/", views.add_pokemon, name="add_pokemon"),  #aggiunge un new pokemon nel db
-    path("pokemon/delete", views.delete_pokemon, name="delete_pokemon") #elimina un pokemon 
+    path("list/", index, name="index"), #recupera tutta la lista dei pokemon
+    path("", add_pokemon, name="add_pokemon"),  #aggiunge un new pokemon nel db
+    path("delete/<int:id>", delete_pokemon, name="delete_pokemon"), #elimina un pokemon 
 ]
