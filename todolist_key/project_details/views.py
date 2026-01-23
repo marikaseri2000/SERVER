@@ -1,26 +1,32 @@
 from django.db import IntegrityError, OperationalError
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
-import json
 from django.views.decorators.csrf import csrf_exempt
+import json
 from project_details.models import ProjectDetails
 
-@csrf_exempt 
+@csrf_exempt
 @require_http_methods(['PATCH'])
 def update_details_project(request, id):
+    """
+    Aggiorna le notes di un ProjectDetails esistente
+    """
     try:
+        # Carica i dati dal body JSON
         data = json.loads(request.body)
-        projects_details = ProjectDetails.objects.get(id=id)
 
-        if data['notes']:
-            projects_details.notes = data['notes']
+        # Ottieni il ProjectDetails corrispondente
+        project_detail = ProjectDetails.objects.get(id=id)
 
-        projects_details.save()
+        # Aggiorna solo se 'notes' è presente nel JSON
+        if 'notes' in data:
+            project_detail.notes = data['notes']
+
+        project_detail.save()
 
         return JsonResponse({
-            'id': projects_details.id,
-            'notes': projects_details.notes,
+            'id': str(project_detail.id),
+            'notes': project_detail.notes,
         }, status=200)
 
     except ProjectDetails.DoesNotExist:
@@ -28,3 +34,6 @@ def update_details_project(request, id):
 
     except json.JSONDecodeError:
         return JsonResponse({'error': 'JSON non valido'}, status=400)
+
+    except OperationalError:
+        return JsonResponse({'error': 'Database non disponibile'}, status=503)

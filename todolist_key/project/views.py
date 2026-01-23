@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
-from django.db import transaction, IntegrityError
+from django.db import OperationalError, transaction, IntegrityError
 import json
 
 from project.models import Project
@@ -13,25 +13,33 @@ from project_details.models import ProjectDetails
 @require_GET
 def get_projects_list(request):
     """
-    Restituisce la lista di tutti i progetti che ci sono nel DB.
+    Restituisce la lista di tutti i progetti con i relativi details
     """
-    projects = Project.objects.select_related('project').all()
-    project_list=[]
-    for project in projects:
-        project_data={
-            'id': project.name,
-            'name': project.name,
-            'details': None
-        }
-        if hasattr(project, 'project'):
-            project_data['details']={
-                'id': project.project_details.id,
-                'notes': project.project_details.notes,
+    try:
+        # select_related usa il nome della relazione OneToOne: 'details'
+        projects = Project.objects.select_related('details').all()
+        
+        projects_list = []
+        for project in projects:
+            project_data = {
+                'id': project.id,
+                'name': project.name,
+                'details': None
             }
-        project_list.append(project_data)
+            
+            # Controlla se esiste la relazione OneToOne
+            if hasattr(project, 'details') and project.details is not None:
+                project_data['details'] = {
+                    'id': project.details.id,
+                    'notes': project.details.notes,
+                }
+            
+            projects_list.append(project_data)
+        
+        return JsonResponse(projects_list, safe=False)
     
-    return JsonResponse(project_list, status=False)
-
+    except OperationalError:
+        return JsonResponse({'error': 'Database non disponibile'}, status=503)
 
 @require_POST
 def add_project(request):

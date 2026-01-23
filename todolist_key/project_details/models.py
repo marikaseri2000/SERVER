@@ -11,8 +11,9 @@ class ProjectDetails(models.Model):
     Con questa istruzione definisco la relazione 1:1 tra ProjectDetails e Project
     """
     project = models.OneToOneField(
-        Project, on_delete=models.CASCADE, related_name="project"
+        Project, on_delete=models.CASCADE, related_name='details'
     )
 
     class Meta:
+        """Il nome della tabella viene definito con questa funzione."""
         db_table = "projects_details"
