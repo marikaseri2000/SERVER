@@ -1,53 +1,70 @@
-import json
-from django.db import IntegrityError, OperationalError
 from django.http import JsonResponse
 from django.shortcuts import render
-from project.models import Project
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db import transaction, IntegrityError
+import json
+
+from project.models import Project
+from project_details.models import ProjectDetails
 
 # Create your views here.
-@csrf_exempt 
+
+def get_projects_list(request):
+    """
+    Restituisce la lista di tutti i progetti che ci sono nel DB.
+    
+    """
+    pass
+
 @require_POST
-def add_task(request):
+def add_project(request):
+    """
+    Aggiunge un nuovo progetto e i relativi details
+    """
     try:
         data = json.loads(request.body)
         
-        task = Project.objects.create(
-            nome=
-            descrizione=
-            status=
+        with transaction.atomic():
+            # Crea il progetto
+            project = Project.objects.create(
+                name=data['name'],
+            )
             
-            titolo=data['titolo'], 
-            descrizione=data['descrizione'],
-            data_creazione=data['data_creazione'],
-            data_modifica=data['data_modifica'],
-            data_completamento=data['data_completamento'],
-        )
+            # Crea automaticamente i details collegati
+            project_details = ProjectDetails.objects.create(
+                project=project,
+                notes=data.get('notes', ''),
+            )
         
         return JsonResponse({
-            'id': task.id, 
-            'titolo': task.titolo, 
-            'descrizione': task.descrizione,
-            'data_creazione': task.data_creazione,
-            'data_modifica': task.data_modifica,
-            'data_completamento': task.data_completamento,
+            'id': project.id,
+            'name': project.name,
+            'details': {
+                'notes': project_details.notes,
+            }
         }, status=201)
     
     except json.JSONDecodeError:
         return JsonResponse({'error': 'JSON non valido'}, status=400)
     
     except KeyError as e:
-        return JsonResponse({'error': f'Campo mancante: {e}'}, status=400)
-    
-    except (ValueError, TypeError):
-        return JsonResponse({'error': 'Tipo di dato non valido'}, status=400)
+        return JsonResponse({'errornotesmancante: {e}'}, status=400)
     
     except IntegrityError:
-        return JsonResponse({'error': 'Project già esistente'}, status=409)
+        return JsonResponse({'error': 'Progetto già esistente'}, status=409)
+
+
+@csrf_exempt
+def handle_projects(request):
+    """
+    La funzione handle_projects verifica quale metodo tra GET e POST sta ricevendo
+    e in base a questo sceglie di eseguire la specifica funzione.
     
-    except OperationalError:
-        return JsonResponse({'error': 'Database non disponibile'}, status=503)
-    
-    except Exception as e:
-        return JsonResponse({'error': 'Errore interno del server'}, status=500)
+    """
+    if request.method == 'GET':
+        return get_projects_list(request)
+    elif request.method == 'POST':
+        return add_project(request)
+    else:
+        return JsonResponse({'error': 'Metodo non consentito'}, status=405)
