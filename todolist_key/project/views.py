@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.db import transaction, IntegrityError
 import json
 
@@ -10,12 +10,28 @@ from project_details.models import ProjectDetails
 
 # Create your views here.
 
+@require_GET
 def get_projects_list(request):
     """
     Restituisce la lista di tutti i progetti che ci sono nel DB.
-    
     """
-    pass
+    projects = Project.objects.select_related('project').all()
+    project_list=[]
+    for project in projects:
+        project_data={
+            'id': project.name,
+            'name': project.name,
+            'details': None
+        }
+        if hasattr(project, 'project'):
+            project_data['details']={
+                'id': project.project_details.id,
+                'notes': project.project_details.notes,
+            }
+        project_list.append(project_data)
+    
+    return JsonResponse(project_list, status=False)
+
 
 @require_POST
 def add_project(request):
