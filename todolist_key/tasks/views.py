@@ -9,25 +9,18 @@ from django.views.decorators.http import require_POST
 
 @csrf_exempt 
 @require_POST
-def add_task(request):
+def add_task(request, id):
     try:
         data = json.loads(request.body)
-        
         task = Task.objects.create(
-            titolo=data['titolo'], 
+            name=data['name'], 
             descrizione=data['descrizione'],
-            data_creazione=data['data_creazione'],
-            data_modifica=data['data_modifica'],
-            data_completamento=data['data_completamento'],
         )
         
         return JsonResponse({
             'id': task.id, 
-            'titolo': task.titolo, 
+            'name': task.name, 
             'descrizione': task.descrizione,
-            'data_creazione': task.data_creazione,
-            'data_modifica': task.data_modifica,
-            'data_completamento': task.data_completamento,
         }, status=201)
     
     except json.JSONDecodeError:
