@@ -3,7 +3,8 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 import json
-from project_details.models import ProjectDetails
+from task_details.models import TaskDetails
+# Create your views here.
 
 @csrf_exempt
 @require_http_methods(['PATCH'])
@@ -15,21 +16,21 @@ def update_details_project(request, id):
         # Carica i dati dal body JSON
         data = json.loads(request.body)
 
-        # Ottieni il ProjectDetails corrispondente
-        project_detail = ProjectDetails.objects.get(id=id)
+        # Ottieni il TaskDetails corrispondente
+        task_detail = TaskDetails.objects.get(id=id)
 
-        # Aggiorna solo se 'notes' è presente nel JSON
-        if 'notes' in data:
-            project_detail.notes = data['notes']
+        # Aggiorna solo se 'descrizione' è presente nel JSON
+        if 'descrizione' in data:
+            task_detail.descrizione = data['descrizione']
 
-        project_detail.save()
+        task_detail.save()
 
         return JsonResponse({
-            'id': str(project_detail.id),
-            'notes': project_detail.notes,
+            'id': str(task_detail.id),
+            'descrizione': task_detail.descrizione,
         }, status=200)
 
-    except ProjectDetails.DoesNotExist:
+    except TaskDetails.DoesNotExist:
         return JsonResponse({'error': 'Dettaglio progetto non trovato'}, status=404)
 
     except json.JSONDecodeError:
