@@ -2,25 +2,29 @@ import json
 from django.db import IntegrityError, OperationalError
 from django.http import JsonResponse
 from django.shortcuts import render
-from .models import Task
+from tasks.models import Task
+from project.models import Project
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-# Create your views here.
+from django.views.decorators.http import require_POST, require_GET
+
 
 @csrf_exempt 
 @require_POST
-def add_task(request, id):
+def create_task(request):
     try:
         data = json.loads(request.body)
+        project=Project.objects.get(id=data['project_id'])
+
         task = Task.objects.create(
-            name=data['name'], 
-            descrizione=data['descrizione'],
+            title=data['title'], 
+            project=project
         )
         
         return JsonResponse({
             'id': task.id, 
-            'name': task.name, 
-            'descrizione': task.descrizione,
+            'title': task.title,
+            'project_id': task.project.id,
+            'is_complete': task.is_complete
         }, status=201)
     
     except json.JSONDecodeError:
@@ -34,9 +38,24 @@ def add_task(request, id):
     
     except IntegrityError:
         return JsonResponse({'error': 'Task già esistente'}, status=409)
+
+@csrf_exempt
+@require_GET
+def get_task(request, projectid):
+    try:
+        tasks = list(Task.objects.filter(project_id=projectid).values())
+        
+        return JsonResponse(tasks, safe=False, status=200)
     
-    except OperationalError:
-        return JsonResponse({'error': 'Database non disponibile'}, status=503)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'JSON non valido'}, status=400)
     
-    except Exception as e:
-        return JsonResponse({'error': 'Errore interno del server'}, status=500)
+    except KeyError as e:
+        return JsonResponse({'error': f'Campo mancante: {e}'}, status=400)
+    
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Tipo di dato non valido'}, status=400)
+    
+    except IntegrityError:
+        return JsonResponse({'error': 'Task già esistente'}, status=409)
+    
