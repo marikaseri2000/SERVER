@@ -10,8 +10,10 @@ cd todolist_key
 
 python manage.py makemigrations
 
-echo"Migrazioni create, inizio a migrare"
+echo "Migrazioni create, inizio a migrare"
 
 python manage.py migrate
 
 python manage.py runserver
+
+echo "Migrazioni applicate con successo!!"
