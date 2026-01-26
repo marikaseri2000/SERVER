@@ -5,7 +5,7 @@ from django.shortcuts import render
 from tasks.models import Task
 from project.models import Project
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_POST, require_GET, require_http_methods 
 
 
 @csrf_exempt 
@@ -59,3 +59,16 @@ def get_task(request, projectid):
     except IntegrityError:
         return JsonResponse({'error': 'Task già esistente'}, status=409)
     
+@csrf_exempt
+@require_http_methods(['DELETE'])
+def delete_task(request, id):
+    try:
+        task = Task.objects.get(id=id)
+        task.delete()
+        return JsonResponse(
+            {'messaggio': 'Task eliminato'}, 
+            status=200)
+    except Project.DoesNotExist:
+        return JsonResponse({'error': 'Task non trovato'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
