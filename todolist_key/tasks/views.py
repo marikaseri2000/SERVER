@@ -38,6 +38,8 @@ def create_task(request):
     
     except IntegrityError:
         return JsonResponse({'error': 'Task già esistente'}, status=409)
+    except Project.DoesNotExist:
+        return JsonResponse({'error': 'Progetto non trovato'}, status=404)
 
 @csrf_exempt
 @require_GET
@@ -65,10 +67,11 @@ def delete_task(request, id):
     try:
         task = Task.objects.get(id=id)
         task.delete()
+        
         return JsonResponse(
             {'messaggio': 'Task eliminato'}, 
             status=200)
-    except Project.DoesNotExist:
+    except Task.DoesNotExist:
         return JsonResponse({'error': 'Task non trovato'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
