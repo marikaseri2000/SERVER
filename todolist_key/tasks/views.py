@@ -75,3 +75,34 @@ def delete_task(request, id):
         return JsonResponse({'error': 'Task non trovato'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+@csrf_exempt
+@require_http_methods(['PATCH'])
+def update_details_task(request, id):
+    """
+    Aggiorna lo stato di un Task esistente
+    """
+    try:
+        # Ottieni il ProjectDetails corrispondente
+        task = Task.objects.get(id=id)
+
+        # Aggiorna solo se 'notes' è presente nel JSON
+        task.is_complete= not task.is_complete
+
+        task.save()
+
+        return JsonResponse({
+            'id': str(task.id),
+            'title': task.title,
+            'is_complete': task.is_complete,
+            'project_id': str(task.project.id),
+        }, status=200)
+
+    except Task.DoesNotExist:
+        return JsonResponse({'error': 'Dettaglio task non trovato'}, status=404)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'JSON non valido'}, status=400)
+
+    except OperationalError:
+        return JsonResponse({'error': 'Database non disponibile'}, status=503)
