@@ -8,7 +8,7 @@ cd todolist_key
 
 DB_FILE="db.sqlite3"
 
-APPS=("tasks" "project" "project_details" "task_details")
+APPS=("tasks" "project" "project_details" "task_details" "tag")
 
 echo "Attenzione!! Questo cancellerà il DB e tutte le migrazioni locali."
 

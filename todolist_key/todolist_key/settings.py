@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'project_details',
     'tasks',
+    'tag',
     'project',
     'task_details',
     'django.contrib.admin',

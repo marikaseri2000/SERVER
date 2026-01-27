@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from project.models import Project
+from tag.models import Tag
 
 # Create your models here.
 class Task(models.Model):
@@ -15,6 +16,7 @@ class Task(models.Model):
         null=True, 
         blank=True
         )
+    tags=models.ManyToManyField(Tag, related_name='tasks', blank=True)
     
     class Meta:
         db_table = "tasks" #la tabella è un insieme di dati
