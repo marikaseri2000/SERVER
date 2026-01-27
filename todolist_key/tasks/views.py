@@ -5,7 +5,8 @@ from django.shortcuts import render
 from tasks.models import Task
 from project.models import Project
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_GET, require_http_methods 
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
+from tag.models import Tag 
 
 
 @csrf_exempt 
@@ -106,3 +107,52 @@ def update_details_task(request, id):
 
     except OperationalError:
         return JsonResponse({'error': 'Database non disponibile'}, status=503)
+
+@csrf_exempt
+@require_POST
+def add_tag(request):
+    try:
+        data=json.loads(request.body)
+        tag = Tag.objects.get(id=data['tag_id'])
+        task = Task.objects.get(id=data['task_id'])
+        task.tags.add(tag)
+        return JsonResponse({
+            'message': 'Tag aggiunto correttamente al Task',
+            'task_id': str(task.id),
+            'tags': list(task.tags.values('id','name'))
+        }, status=201)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Json non valido'}, status=400)
+    
+    # ❌ ID mancanti o non convertibili
+    except (KeyError, ValueError, TypeError):
+        return JsonResponse(
+            {'error': 'tag_id e task_id devono essere numeri validi'},
+            status=400
+        )
+
+    # ❌ Oggetti non trovati
+    except Tag.DoesNotExist:
+        return JsonResponse({'error': 'Tag non trovato'}, status=404)
+
+    except Task.DoesNotExist:
+        return JsonResponse({'error': 'Task non trovato'}, status=404)
+
+    # ❌ Problemi DB
+    except (IntegrityError, OperationalError):
+        return JsonResponse(
+            {'error': 'Errore del database'},
+            status=500
+        )
+
+    # ❌ Catch-all (mai lasciare Django esplodere in produzione)
+    except Exception as e:
+        return JsonResponse(
+            {'error': 'Errore interno', 'details': str(e)},
+            status=500
+        )
+
+
+
+
+
