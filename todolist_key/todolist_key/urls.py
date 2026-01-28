@@ -16,6 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
+from todolist_key.accounts.views import RegisterView
 
 urlpatterns = [
     path('projects_details/', include("project_details.urls")),
@@ -23,4 +29,8 @@ urlpatterns = [
     path('tags/', include("tag.urls")),
     path('tasks/', include("tasks.urls")),
     path('admin/', admin.site.urls),
+    path('api/register/', RegisterView.as_view(), name='register'),
+    # JWT endpoints
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh')
 ]
