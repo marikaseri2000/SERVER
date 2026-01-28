@@ -21,7 +21,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from todolist_key.accounts.views import RegisterView
+from accounts.views import RegisterView
 
 urlpatterns = [
     path('projects_details/', include("project_details.urls")),
