@@ -43,11 +43,12 @@ def create_task(request):
     except Project.DoesNotExist:
         return JsonResponse({'error': 'Progetto non trovato'}, status=404)
 
-@csrf_exempt
-@require_GET
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def get_task(request, projectid):
     try:
-        tasks = list(Task.objects.filter(project_id=projectid).values())
+        tasks = list(Task.objects.filter(project__user_id=request.user, project_id=projectid).values())
         
         return JsonResponse(tasks, safe=False, status=200)
     
