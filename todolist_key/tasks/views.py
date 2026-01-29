@@ -9,12 +9,13 @@ from django.views.decorators.http import require_POST, require_GET, require_http
 from tag.models import Tag 
 
 
-@csrf_exempt 
-@require_POST
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def create_task(request):
     try:
         data = json.loads(request.body)
-        project=Project.objects.get(id=data['project_id'])
+        project=Project.objects.filter(user=request.user).get(id=data['project_id'])
 
         task = Task.objects.create(
             title=data['title'], 
