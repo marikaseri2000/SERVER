@@ -5,9 +5,12 @@ from django.shortcuts import render
 from tasks.models import Task
 from project.models import Project
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_GET, require_http_methods
+from django.views.decorators.http import require_POST, require_http_methods
 from tag.models import Tag 
-
+from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])

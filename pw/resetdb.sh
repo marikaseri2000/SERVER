@@ -1,14 +1,10 @@
 #!/bin/bash
 
-echo "Attivazione del venv automatizzato"
-
-source venv/bin/activate
-
-cd todolist_key
+echo "Attivazione del venv già fatto in precedenza"
 
 DB_FILE="db.sqlite3"
 
-APPS=("tasks" "project" "project_details" "task_details" "tag" "accounts")
+APPS=("giorni_presenze" "partecipanti" "presenze" "users")
 
 echo "Attenzione!! Questo cancellerà il DB e tutte le migrazioni locali."
 
