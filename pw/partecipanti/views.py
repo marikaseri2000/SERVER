@@ -17,7 +17,8 @@ def manage_participants(request):
         return JsonResponse({'error': 'Solo l\'admin può gestire i partecipanti'}, status=403)
 
     if request.method == 'GET':
-        partecipanti = Partecipante.objects.all()
+        # Escludiamo gli admin dalla lista dei partecipanti
+        partecipanti = Partecipante.objects.exclude(user__is_admin=True)
         serializer = ParticipantAdminSerializer(partecipanti, many=True)
         return JsonResponse(serializer.data, safe=False)
 
