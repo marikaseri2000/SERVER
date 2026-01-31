@@ -33,10 +33,10 @@ def manage_giorni(request):
                 is_active=data.get('is_active', True)
             )
             
-            # Restituiamo l'UUID appena creato (id_giorno)
+            # Restituiamo la data appena creata
             return JsonResponse({
                 'message': 'Giorno creato con successo',
-                'id_giorno': nuovo_giorno.id_giorno, 
+                'id_giorno': nuovo_giorno.data, 
                 'data': nuovo_giorno.data
             }, status=status.HTTP_201_CREATED)
             
@@ -52,7 +52,7 @@ def manage_giorni(request):
         lista_giorni = []
         for g in giorni:
             lista_giorni.append({
-                'id_giorno': g.id_giorno, # Questo è l'UUID che ti serve per le presenze!
+                'id_giorno': g.data, # Questo ora è la data YYYY-MM-DD
                 'data': g.data,
                 'descrizione': g.descrizione,
                 'is_active': g.is_active

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from partecipanti.models import Partecipante
 
@@ -28,8 +29,20 @@ class RegisterSerializer(serializers.ModelSerializer):
         # Togliamo password2 prima di salvare nel DB
         validated_data.pop('password2')
         
+        # Recuperiamo la admin_key dalla richiesta
+        request = self.context.get('request')
+        admin_key_received = request.data.get('admin_key') if request else None
+        
+        is_admin = False
+        if admin_key_received and admin_key_received == settings.ADMIN_SECRET_KEY:
+            is_admin = True
+        
         # Creiamo l'utente
-        user = User.objects.create_user(**validated_data, is_participant=True)
+        user = User.objects.create_user(
+            **validated_data, 
+            is_admin=is_admin,
+            is_participant=not is_admin
+        )
         
         # Colleghiamo l'utente al profilo partecipante esistente
         try:

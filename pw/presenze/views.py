@@ -54,7 +54,7 @@ def lista_presenze_giorno(request, giorno_id):
     if not request.user.is_admin:
         return JsonResponse({'error': 'Accesso negato'}, status=403)
 
-    presenze = Presenza.objects.filter(id_giorno=giorno_id, stato=True).select_related('partecipante')
+    presenze = Presenza.objects.filter(giorno_id=giorno_id, stato=True).select_related('partecipante')
     
     risultato = []
     for p in presenze:
