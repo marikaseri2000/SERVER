@@ -64,3 +64,27 @@ def lista_presenze_giorno(request, giorno_id):
         })
         
     return JsonResponse(risultato, safe=False)
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def lista_assenze_partecipante(request, partecipante_id):
+    """
+    Restituisce la lista delle date in cui un partecipante è stato assente
+    """
+    if not request.user.is_admin:
+        return JsonResponse({'error': 'Accesso negato'}, status=403)
+
+    assenze = Presenza.objects.filter(
+        partecipante_id=partecipante_id, 
+        stato=False
+    ).select_related('giorno')
+
+    risultato = []
+    for a in assenze:
+        risultato.append({
+            'data': a.giorno.data,
+            'descrizione': a.giorno.descrizione
+        })
+        
+    return JsonResponse(risultato, safe=False)

@@ -27,9 +27,51 @@ def manage_participants(request):
         if serializer.is_valid():
             # QUESTO SALVA NEL DATABASE (DBeaver vedrà i dati)
             serializer.save() 
-            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.data, status=201)
         
-        return JsonResponse(serializer.errors, status=400)
+    return JsonResponse(serializer.errors, status=400)
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_participant_summary_admin(request, partecipante_id):
+    """
+    Permette all'admin di vedere il riepilogo di un partecipante specifico tramite ID
+    """
+    if not request.user.is_admin:
+        return JsonResponse({'error': 'Solo l\'admin può vedere i riepiloghi altrui'}, status=403)
+
+    try:
+        # Recuperiamo il partecipante tramite ID (matricola)
+        partecipante = Partecipante.objects.get(matricola=partecipante_id)
+
+        # Contiamo i giorni totali
+        giorni_totali = Giorno.objects.count()
+
+        # Contiamo le presenze effettive
+        presenze_effettive = Presenza.objects.filter(
+            partecipante=partecipante, 
+            stato=True
+        ).count()
+
+        percentuale = (presenze_effettive / giorni_totali * 100) if giorni_totali > 0 else 0
+
+        return JsonResponse({
+            'matricola': partecipante.matricola,
+            'email': partecipante.email_preautorizzata,
+            'dati_frequenza': {
+                'lezioni_totali': giorni_totali,
+                'presenze_confermate': presenze_effettive,
+                'percentuale': f"{round(percentuale, 2)}%",
+                'obiettivo_80_percento': percentuale >= 80
+            }
+        }, status=status.HTTP_200_OK)
+
+    except Partecipante.DoesNotExist:
+        return JsonResponse({'error': 'Partecipante non trovato'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
 
 # VISTA DEI PARTECIPANTI
 
