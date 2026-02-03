@@ -7,8 +7,24 @@ from django.http import JsonResponse
 from .models import Partecipante
 from giorni_presenze.models import Giorno
 from presenze.models import Presenza
+from drf_spectacular.utils import extend_schema_view, extend_schema
 from partecipanti.serializers import ParticipantAdminSerializer # Assicurati di averlo creato!
 
+@extend_schema_view(
+    get=extend_schema(
+        summary="Elenco partecipanti",
+        description="Restituisce la lista dei partecipanti (esclusi gli admin)",
+        tags=["PARTECIPANTI"],
+        responses={200: ParticipantAdminSerializer(many=True)},
+    ),
+    post=extend_schema(
+        summary="Registrazione partecipante",
+        description="Crea un nuovo partecipante",
+        tags=["PARTECIPANTI"],
+        request=ParticipantAdminSerializer,
+        responses={201: ParticipantAdminSerializer},
+    ),
+)
 @api_view(['GET', 'POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -31,6 +47,14 @@ def manage_participants(request):
         
     return JsonResponse(serializer.errors, status=400)
 
+
+@extend_schema(
+    summary="Riepilogo dati partecipante (admin)",
+    description="Permette all'admin di vedere il riepilogo di un partecipante specifico tramite ID",
+    tags=["PARTECIPANTI"],
+    request=ParticipantAdminSerializer,
+    responses={200}
+)
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -74,7 +98,13 @@ def get_participant_summary_admin(request, partecipante_id):
 
 
 # VISTA DEI PARTECIPANTI
-
+@extend_schema(
+    summary="Statistiche delle presenze",
+    description="Calcola la percentuale basata sui giorni totali e le presenze effettive",
+    tags=["PARTECIPANTI"],
+    request=ParticipantAdminSerializer,
+    responses={200}
+)
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])

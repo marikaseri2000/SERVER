@@ -47,9 +47,20 @@ INSTALLED_APPS = [
     'presenze',
     'users',
     'rest_framework',
+    'drf_spectacular',
 ]
 
 AUTH_USER_MODEL = 'users.User'
+REST_FRAMEWORK = {
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = { 
+    'TITLE': 'Il Mio Progetto API', 
+    'DESCRIPTION': 'Documentazione delle API del progetto di gruppo', 
+    'VERSION': '1.0.0', 
+    'SERVE_INCLUDE_SCHEMA': False, }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

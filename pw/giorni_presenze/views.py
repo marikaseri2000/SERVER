@@ -5,7 +5,24 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from .models import Giorno
+from drf_spectacular.utils import extend_schema_view, extend_schema
 
+
+@extend_schema_view(
+    get=extend_schema(
+        summary="Calendario lezioni",
+        description="Restituisce la lista di tutti i giorni creati",
+        tags=["GIORNI"],
+        responses={200}
+    ),
+    post=extend_schema(
+        summary="Registrazione giorno",
+        description="Crea un nuovo giorno",
+        tags=["GIORNI"],
+        request=Giorno,
+        responses={201}
+    ),
+)
 @api_view(['GET', 'POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])

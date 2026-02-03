@@ -6,11 +6,18 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db import OperationalError, IntegrityError
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from drf_spectacular.utils import extend_schema
 from .serializers import RegisterSerializer
 
 # VISTA PER LA REGISTRAZIONE (ACCESSIBILE A TUTTI)
 
+@extend_schema(
+    summary="Registrazione utente",
+    description="Restituisce l'username del nuovo partecipante",
+    tags=["USER"],
+    request=RegisterSerializer,
+    responses={200}
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])  # Permettiamo a chiunque di inviare i dati per registrarsi
 def register_user(request):
@@ -39,6 +46,13 @@ def register_user(request):
 
 # VISTA PER IL PROFILO (SOLO UTENTE LOGGATO)
 
+@extend_schema(
+    summary="Dati profilo utente",
+    description="Restituisce i dati base dell'utente attualmente loggato tramite Token",
+    tags=["USER"],
+    request=RegisterSerializer,
+    responses={200}
+)
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])

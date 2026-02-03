@@ -3,11 +3,17 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
-
 from .models import Presenza
-from partecipanti.models import Partecipante
-from giorni_presenze.models import Giorno
+from drf_spectacular.utils import extend_schema
 
+
+@extend_schema(
+    summary="Registro presenze",
+    description="L'admin registra la presenza singola del partecipante",
+    tags=["PRESENZE"],
+    request=Presenza,
+    responses={200}
+)
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -44,6 +50,13 @@ def registra_presenza_singola(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
+@extend_schema(
+    summary="Elenco presenze di un singolo giorno",
+    description="Restituisce l'elenco di tutti quelli che erano presenti in un giorno specifico",
+    tags=["PRESENZE"],
+    request=Presenza,
+    responses={200}
+)
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -65,6 +78,13 @@ def lista_presenze_giorno(request, giorno_id):
         
     return JsonResponse(risultato, safe=False)
 
+@extend_schema(
+    summary="Elenco assenze di un partecipante",
+    description="Restituisce la lista delle date in cui un partecipante è stato assente",
+    tags=["PRESENZE"],
+    request=Presenza,
+    responses={200}
+)
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
