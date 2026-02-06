@@ -7,8 +7,8 @@ from django.http import JsonResponse
 from .models import Partecipante
 from giorni_presenze.models import Giorno
 from presenze.models import Presenza
-from drf_spectacular.utils import extend_schema_view, extend_schema
 from partecipanti.serializers import ParticipantAdminSerializer # Assicurati di averlo creato!
+from drf_spectacular.utils import extend_schema_view, extend_schema
 
 @extend_schema_view(
     get=extend_schema(
@@ -130,6 +130,7 @@ def get_my_attendance_summary(request):
 
         return JsonResponse({
             'matricola': partecipante.matricola,
+            'username': request.user.username,
             'dati_frequenza': {
                 'lezioni_totali': giorni_totali,
                 'presenze_confermate': presenze_effettive,
